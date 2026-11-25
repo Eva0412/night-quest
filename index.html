@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Ночной квест 🌙</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Rubik:wght@700;900&display=swap&subset=cyrillic" rel="stylesheet">
+<style>
+  :root{ --sky1:#1b1240; --sky2:#3a1f6b; --pink:#ff7eb6; --pink3:#ff4f9a; --lav:#c9a7ff; --gold:#ffe27a; --card:#fff; --ink:#3d1d57; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100%;overflow-x:hidden;
+    background:radial-gradient(ellipse at 50% 0%,#5b2f8f 0%,var(--sky2) 35%,var(--sky1) 100%) fixed}
+  #sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:90}
+  .moon{position:fixed;top:120px;right:-18px;width:64px;height:64px;border-radius:50%;z-index:1;
+    background:radial-gradient(circle at 35% 35%,#fffbe6,#ffe9a8 60%,#f5cf6b);box-shadow:0 0 40px 10px rgba(255,226,122,.35)}
+  .moon::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(220,180,90,.35);left:18px;top:30px;
+    box-shadow:20px -12px 0 -2px rgba(220,180,90,.3),16px 12px 0 -4px rgba(220,180,90,.3)}
+
+  .app{position:relative;z-index:2;max-width:520px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;gap:14px;min-height:100%}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font-weight:900}
+  .chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:6px 14px;border-radius:20px;font-size:14px;backdrop-filter:blur(6px)}
+  .prog{height:10px;background:rgba(255,255,255,.15);border-radius:10px;overflow:hidden}
+  .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--lav),var(--gold));border-radius:10px;transition:width .6s}
+
+  .guide{display:flex;align-items:flex-end;gap:10px}
+  .guide svg{width:84px;flex:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+  .bubble{position:relative;background:#fff;border-radius:18px 18px 18px 4px;padding:12px 14px;font-weight:800;font-size:15px;line-height:1.4;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);flex:1}
+  .bubble b{color:var(--pink3)}
+
+  .card{background:var(--card);border-radius:24px;padding:20px 18px;box-shadow:0 14px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:14px;
+    animation:pop .45s cubic-bezier(.3,1.5,.5,1)}
+  @keyframes pop{from{transform:scale(.92);opacity:0}}
+  .tag{align-self:flex-start;font-family:'Rubik';font-weight:700;font-size:12px;letter-spacing:.12em;color:#fff;padding:5px 12px;border-radius:12px;
+    background:linear-gradient(135deg,var(--pink3),#9b5cff)}
+  h2{font-family:'Rubik';font-weight:900;font-size:clamp(22px,6vw,28px);line-height:1.15;text-wrap:balance}
+  .text{font-size:16.5px;line-height:1.55;font-weight:600}
+  .text p+p{margin-top:8px}
+  .text ul{padding-left:20px;margin-top:6px}
+  .muted{font-size:14px;color:#8b6fa3;font-weight:700}
+
+  input[type=text]{width:100%;font:800 18px 'Nunito';color:var(--ink);padding:13px 16px;border-radius:16px;border:2px solid #e6d6f5;outline:none;background:#faf6ff}
+  input[type=text]:focus{border-color:var(--pink)}
+  .btn{font:900 17px 'Nunito';border:none;border-radius:18px;padding:14px 18px;cursor:pointer;color:#fff;
+    background:linear-gradient(135deg,var(--pink3),#9b5cff);box-shadow:0 6px 0 #6b2f9f;transition:transform .1s}
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #6b2f9f}
+  .btn.ghost{background:#f1e8fb;color:var(--ink);box-shadow:0 4px 0 #d9c6ee}
+  .btn.gold{background:linear-gradient(135deg,#ffb84d,#ff7eb6);box-shadow:0 6px 0 #c2567f}
+  .btn:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+  .msg{font-weight:900;font-size:16px;text-align:center;min-height:1.4em}
+  .msg.ok{color:#1fa36b}.msg.bad{color:#e0446f}
+  .big-timer{font-family:'Rubik';font-weight:900;font-size:64px;text-align:center;color:var(--pink3);font-variant-numeric:tabular-nums}
+  .move{font-family:'Rubik';font-weight:900;font-size:clamp(24px,7vw,32px);text-align:center;padding:22px 10px;border-radius:20px;
+    background:linear-gradient(135deg,#ffe4f2,#efe4ff);min-height:120px;display:flex;align-items:center;justify-content:center;line-height:1.2}
+  .key{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .key span{background:#f3ebfc;border-radius:10px;padding:6px 0;text-align:center;font-weight:900;font-size:14px}
+  .key span small{display:block;color:var(--pink3);font-size:12px}
+  .code{font-family:'Rubik';font-weight:900;font-size:26px;letter-spacing:.06em;text-align:center;color:var(--ink);background:#fff4c7;border-radius:16px;padding:12px}
+  .q{font-family:'Rubik';font-weight:900;font-size:22px;text-align:center;padding:14px;border-radius:18px;background:#f3ebfc}
+  .stars{text-align:center;font-size:26px;letter-spacing:4px}
+
+  /* дуэль */
+  .duel{position:fixed;inset:0;z-index:80;display:none;flex-direction:column}
+  .duel.show{display:flex}
+  .half{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:900;
+    user-select:none;touch-action:manipulation;cursor:pointer;position:relative;overflow:hidden}
+  .half.p1{background:linear-gradient(180deg,#ff4f9a,#ff8fc1);transform:rotate(180deg)}
+  .half.p2{background:linear-gradient(180deg,#9b5cff,#c9a7ff)}
+  .half .nm{font-family:'Rubik';font-size:24px}
+  .half .cnt{font-family:'Rubik';font-size:72px;line-height:1}
+  .half .fill{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.25);height:0;transition:height .08s}
+  .half>*{position:relative}
+  .duel .mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;z-index:2;pointer-events:none}
+  .duel .mid span{display:inline-block;background:#fff;color:var(--ink);font-family:'Rubik';font-weight:900;font-size:22px;padding:8px 18px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+
+  .cert{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .medal{font-size:70px;animation:float 2.4s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-8px) rotate(-4deg)}}
+  .cert .names{font-family:'Rubik';font-weight:900;font-size:26px;color:var(--pink3)}
+  .cert .title{font-family:'Rubik';font-weight:900;font-size:22px}
+  .secret{background:#fff4c7;border:2px dashed #ffb84d;border-radius:16px;padding:12px 14px;font-weight:800;line-height:1.45}
+  .reset{background:none;border:none;color:rgba(255,255,255,.55);font:700 13px 'Nunito';text-decoration:underline;cursor:pointer;align-self:center;margin-top:auto}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="moon"></div>
+<canvas id="fx"></canvas>
+
+<div class="app" id="app"></div>
+
+<div class="duel" id="duel">
+  <div class="half p1" id="p1"><div class="fill" id="f1"></div><div class="nm" id="n1"></div><div class="cnt" id="c1">0</div><div>ЖМИ БЫСТРЕЕ!</div></div>
+  <div class="mid"><span id="duelMid">3</span></div>
+  <div class="half p2" id="p2"><div class="fill" id="f2"></div><div class="nm" id="n2"></div><div class="cnt" id="c2">0</div><div>ЖМИ БЫСТРЕЕ!</div></div>
+</div>
+
+<!-- Жир-ведущий (используется как шаблон) -->
+<template id="zhir">
+  <svg viewBox="0 0 120 160">
+    <path d="M40,146 C8,146 4,108 18,84" stroke="#c99a5f" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <path fill="#faf0df" d="M26,153 C8,120 30,82 60,80 C90,82 112,120 94,153 Z"/>
+    <ellipse cx="60" cy="130" rx="22" ry="18" fill="#fff8ec"/>
+    <path d="M46,142 L46,151 M74,142 L74,151" stroke="#d6aa6e" stroke-width="9" stroke-linecap="round"/>
+    <path fill="#c99a5f" d="M46,58 C24,52 6,28 9,8 Q11,0 20,3 C40,12 54,26 63,42 Z"/>
+    <path fill="#c99a5f" d="M74,58 C96,52 114,28 111,8 Q109,0 100,3 C80,12 66,26 57,42 Z"/>
+    <path fill="#f2c9b0" d="M44,50 C28,45 16,29 17,14 Q19,9 24,11 C38,18 48,28 55,40 Z"/>
+    <path fill="#f2c9b0" d="M76,50 C92,45 104,29 103,14 Q101,9 96,11 C82,18 72,28 65,40 Z"/>
+    <path fill="#faf0df" d="M33,60 C33,45 46,38 60,38 C74,38 87,45 87,60 C88,78 74,94 60,96 C46,94 32,78 33,60 Z"/>
+    <path fill="#d6aa6e" opacity=".75" d="M46,62 C50,56 70,56 74,62 C76,72 68,88 60,92 C52,88 44,72 46,62 Z"/>
+    <ellipse cx="50" cy="64" rx="7" ry="4.6" fill="#6fc6ff" transform="rotate(14 50 64)"/><ellipse cx="50" cy="64" rx="1.5" ry="4" fill="#0b0b0b"/>
+    <ellipse cx="70" cy="64" rx="7" ry="4.6" fill="#6fc6ff" transform="rotate(-14 70 64)"/><ellipse cx="70" cy="64" rx="1.5" ry="4" fill="#0b0b0b"/>
+    <circle cx="48" cy="62.5" r="1.2" fill="#fff"/><circle cx="68" cy="62.5" r="1.2" fill="#fff"/>
+    <path d="M57,78 L63,78 L60,82 Z" fill="#e0909a"/>
+    <path d="M44,80 L28,77 M44,83 L29,85 M76,80 L92,77 M76,83 L91,85" stroke="#fff" stroke-width="1" opacity=".7"/>
+    <!-- ночной колпак -->
+    <path d="M40,44 C46,20 70,8 96,14 C84,20 78,30 80,44 Z" fill="#9b5cff"/>
+    <path d="M38,44 Q60,36 82,44" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <circle cx="97" cy="14" r="6" fill="#fff"/>
+    <path d="M56,28 l2,4 4,.6 -3,3 .7,4 -3.7,-2 -3.7,2 .7,-4 -3,-3 4,-.6Z" fill="#ffe27a"/>
+  </svg>
+</template>
+
+<script>
+/* ======== НАСТРОЙКИ — можно менять ======== */
+const CONFIG = {
+  // Если хотите приготовить маленький сюрприз в финале (например, коробку с вкусняшками),
+  // напишите, где он спрятан. Оставьте пустым "" — тогда сюрприза не будет.
+  secret: ""
+};
+/* ========================================== */
+
+const STAGES = [
+  { type:'riddle', tag:'ЗАГАДКА', title:'Разминка для мозга',
+    say:'Мяу! Я Жир, ведущий ночного квеста. Начнём с простого… или нет? 😼',
+    text:'<p>Что можно увидеть с закрытыми глазами?</p>',
+    answers:['сон','сны','сновидение','сновидения'], hint:'Это бывает каждую ночь, а иногда даже страшное…' },
+
+  { type:'timer', tag:'ЧЕЛЛЕНДЖ', title:'Модный показ', seconds:180,
+    say:'Я, конечно, и так самый красивый. Но вы попробуйте! 💅',
+    text:'<p>За 3 минуты соберите самый безумный образ из того, что найдёте в комнате: пледы, шарфы, носки, заколки, подушки — всё идёт в дело!</p><p>Потом устройте показ: пройдитесь «по подиуму» под любую музыку.</p>' },
+
+  { type:'duel', tag:'ДУЭЛЬ', title:'Кто быстрее?',
+    say:'Положите телефон на стол между собой. Каждая жмёт на свою половину экрана. Кто первой наберёт 40 — победила! ⚡',
+    text:'<p>Сядьте друг напротив друга, телефон — посередине. По сигналу жмите на свой цвет как можно быстрее!</p>' },
+
+  { type:'photo', tag:'ФОТО-МИССИЯ', title:'Фото с котиком',
+    say:'А вот это моё любимое задание. Со мной фото — это честь! 📸',
+    text:'<p>Сделайте селфи с котиком так, чтобы котик выглядел <b>самым главным</b> на фото.</p><p>Бонус: если в кадре окажутся обе кошки — вы легенды.</p>' },
+
+  { type:'cipher', tag:'ШИФР', title:'Секретное послание',
+    say:'Я перехватил шифровку! Расшифруйте — тут спрятан главный наряд этой ночи. 🕵️‍♀️',
+    text:'<p>Каждой букве соответствует число. Используйте ключ:</p>',
+    code:'17 · 10 · 8 · 1 · 14 · 1', answers:['пижама'], hint:'Первая буква — П. Это то, в чём вы будете спать!' },
+
+  { type:'dance', tag:'ТАНЦЫ', title:'Танцевальный хаос', seconds:60,
+    say:'Включите музыку погромче! Каждые 5 секунд я буду говорить, КАК танцевать. Кто остановится — тот проиграл! 💃',
+    text:'<p>Минута танцев. Следите за экраном и меняйте движения на ходу.</p>' },
+
+  { type:'riddle', tag:'ЗАГАДКА', title:'Хитрый вопрос',
+    say:'Эту загадку не все взрослые отгадывают. Проверим, кто тут умнее. 🤓',
+    text:'<p>Чем больше из неё берёшь, тем больше она становится. Что это?</p>',
+    answers:['яма','ямка','дыра','дырка'], hint:'Её копают лопатой.' },
+
+  { type:'timer', tag:'ЧЕЛЛЕНДЖ', title:'Не смейся!', seconds:60,
+    say:'Самое сложное испытание. Даже я бы не выдержал. 😹',
+    text:'<p>Смотрите друг другу в глаза целую минуту. Можно корчить рожи, но <b>нельзя смеяться</b>!</p><p>Кто первой засмеётся — делает подруге комплимент.</p>' },
+
+  { type:'match', tag:'ИГРА', title:'Мысли сходятся?',
+    say:'Проверим, насколько вы на одной волне! 🌊',
+    text:'<p>Я задаю вопрос. На счёт «три» отвечайте <b>одновременно вслух</b>. Совпало — получаете звезду!</p>',
+    questions:['Любимый цвет?','Животное, которое ты бы завела?','Лучшая еда на свете?','Куда бы ты полетела прямо сейчас?','Какую суперсилу ты бы выбрала?','Самый лучший мультфильм или аниме?','Лучшее время года?'] },
+
+  { type:'timer', tag:'ФИНАЛ', title:'Ночная история', seconds:300,
+    say:'Последнее задание. Выключите свет, включите фонарик… 🔦',
+    text:'<p>Придумайте вместе историю: каждая говорит по одному предложению по очереди.</p><p>Начало такое: <b>«Ночью Жир проснулся и увидел, что дверь холодильника светится…»</b></p><p>5 минут. Чем страннее — тем лучше!</p>' }
+];
+
+/* ---------- состояние ---------- */
+const KEY = 'night-quest-v1';
+const $ = id => document.getElementById(id);
+let S; try { S = JSON.parse(localStorage.getItem(KEY)) } catch(e) {}
+S = S || { a:'', b:'', step:-1, stars:0 };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)) } catch(e) {} };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => s.toLowerCase().replace(/ё/g,'е').replace(/[^а-яa-z]/g,'');
+let timerId = null;
+function stopTimer(){ clearInterval(timerId); timerId = null; }
+
+function guide(say){
+  return `<div class="guide">${$('zhir').innerHTML}<div class="bubble">${say}</div></div>`;
+}
+function header(){
+  const n = STAGES.length, cur = Math.max(0, Math.min(S.step, n));
+  return `<div class="top"><span class="chip">🌙 Этап ${Math.min(cur+1, n)} / ${n}</span><span class="chip">⭐ ${S.stars}</span></div>
+    <div class="prog"><i style="width:${cur/n*100}%"></i></div>`;
+}
+function addStars(k){ S.stars += k; save(); }
+function next(stars){ stopTimer(); if (stars) addStars(stars); S.step++; save(); render(); burst(W/2, H*.3, 40); }
+
+/* ---------- экраны ---------- */
+function render(){
+  stopTimer();
+  const app = $('app');
+  if (S.step < 0) return renderStart(app);
+  if (S.step >= STAGES.length) return renderFinal(app);
+  const st = STAGES[S.step];
+  app.innerHTML = header() + guide(st.say) +
+    `<div class="card"><span class="tag">${st.tag}</span><h2>${st.title}</h2><div class="text">${st.text}</div><div id="zone" style="display:flex;flex-direction:column;gap:12px"></div></div>` +
+    `<button class="reset" id="rs">Начать квест заново</button>`;
+  $('rs').onclick = () => { if (S.step <= 0 || $('rs').dataset.sure) { localStorage.removeItem(KEY); S = {a:'',b:'',step:-1,stars:0}; render(); } else { $('rs').dataset.sure = 1; $('rs').textContent = 'Точно? Нажмите ещё раз — прогресс сотрётся'; } };
+  ({riddle, timer, duel, photo, cipher, dance, match})[st.type](st, $('zone'));
+  scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderStart(app){
+  app.innerHTML = `<div style="height:40px"></div>` + guide('Мяу! Я Жир. Сегодня я — ведущий <b>Ночного квеста</b>. Впишите свои имена, и начнём! 🌙') +
+    `<div class="card"><span class="tag">НОЧЁВКА</span><h2>Ночной квест</h2>
+      <div class="text"><p>10 этапов: загадки, шифры, дуэль, танцы и челленджи. За каждое задание — звёзды ⭐. В конце вас ждёт звание!</p></div>
+      <input type="text" id="na" placeholder="Имя первой участницы" maxlength="16" autocomplete="off">
+      <input type="text" id="nb" placeholder="Имя второй участницы" maxlength="16" autocomplete="off">
+      <button class="btn" id="go">▶ Начать квест</button>
+      <div class="msg bad" id="m"></div></div>`;
+  $('na').value = S.a; $('nb').value = S.b;
+  $('go').onclick = () => {
+    const a = $('na').value.trim(), b = $('nb').value.trim();
+    if (!a || !b) { $('m').textContent = 'Впишите оба имени 🙂'; return; }
+    S.a = a; S.b = b; S.step = 0; save(); render(); burst(W/2, H*.4, 80);
+  };
+}
+
+function riddle(st, z){
+  let tries = 0;
+  z.innerHTML = `<input type="text" id="ans" placeholder="Ваш ответ" autocomplete="off">
+    <button class="btn" id="chk">Проверить</button>
+    <div class="row"><button class="btn ghost" id="hint">💡 Подсказка</button><button class="btn ghost" id="give">🏳️ Сдаться</button></div>
+    <div class="msg" id="m"></div>`;
+  let hinted = false;
+  const check = () => {
+    const v = norm($('ans').value);
+    if (!v) return;
+    if (st.answers.some(a => norm(a) === v)) { $('m').className = 'msg ok'; $('m').textContent = 'Правильно! 🎉 +' + (hinted ? 2 : 3) + ' ⭐';
+      $('chk').disabled = true; setTimeout(() => next(hinted ? 2 : 3), 1300); }
+    else { tries++; $('m').className = 'msg bad'; $('m').textContent = tries > 1 ? 'Не-а 😼 Может, подсказку?' : 'Не-а, попробуйте ещё!'; }
+  };
+  $('chk').onclick = check;
+  $('ans').onkeydown = e => { if (e.key === 'Enter') check(); };
+  $('hint').onclick = () => { hinted = true; $('m').className = 'msg'; $('m').textContent = '💡 ' + st.hint; };
+  $('give').onclick = () => { $('m').className = 'msg'; $('m').textContent = 'Ответ: ' + st.answers[0].toUpperCase() + ' 😺';
+    $('give').disabled = true; $('chk').disabled = true; setTimeout(() => next(0), 2200); };
+}
+
+function countdown(sec, el, onEnd){
+  let left = sec; const show = () => el.textContent = Math.floor(left/60) + ':' + String(left%60).padStart(2,'0');
+  show(); stopTimer();
+  timerId = setInterval(() => { left--; show(); if (left <= 0) { stopTimer(); onEnd(); } }, 1000);
+}
+function timer(st, z){
+  z.innerHTML = `<div class="big-timer" id="t">${Math.floor(st.seconds/60)}:${String(st.seconds%60).padStart(2,'0')}</div>
+    <button class="btn" id="start">⏱ Запустить таймер</button>
+    <button class="btn gold" id="done">✅ Выполнено! (+3 ⭐)</button>`;
+  $('start').onclick = () => { $('start').disabled = true;
+    countdown(st.seconds, $('t'), () => { $('t').textContent = 'Время!'; burst(W/2, H*.4, 60); }); };
+  $('done').onclick = () => next(3);
+}
+function photo(st, z){
+  z.innerHTML = `<div class="muted">Сфоткайте обычной камерой телефона, а потом вернитесь сюда.</div>
+    <button class="btn gold" id="done">📸 Фото готово! (+3 ⭐)</button>`;
+  $('done').onclick = () => next(3);
+}
+function cipher(st, z){
+  const abc = 'абвгдеёжзийклмноп'.split('');
+  z.innerHTML = `<div class="key">${abc.map((l,i)=>`<span>${l.toUpperCase()}<small>${i+1}</small></span>`).join('')}</div>
+    <div class="code">${st.code}</div>`;
+  const inner = document.createElement('div'); inner.style.cssText = 'display:flex;flex-direction:column;gap:12px'; z.appendChild(inner);
+  riddle(st, inner);
+}
+function dance(st, z){
+  const moves = ['Как робот 🤖','Как Жир, который увидел еду 🐱','ЗАМРИ! 🧊','Как балерина 🩰','В замедленной съёмке 🐢','Как зомби 🧟',
+    'Как звезда K-pop ⭐','Только руками 👐','Пол — это лава! 🔥','Повторяй за подругой 👯','Как супергерой 🦸','Как чёрная кошка на охоте 🐈‍⬛',
+    'Как будто ты желе 🍮','Как пингвин 🐧','Как будто ты на дискотеке 80-х 🕺'];
+  z.innerHTML = `<div class="move" id="mv">Нажмите «Старт» и включите музыку 🎵</div><div class="big-timer" id="t" style="font-size:44px">1:00</div>
+    <button class="btn" id="start">▶ Старт</button><button class="btn gold" id="done" hidden>✅ Мы выжили! (+3 ⭐)</button>`;
+  $('start').onclick = () => {
+    $('start').hidden = true; let k = 0, last = -1;
+    const pick = () => { let i; do { i = Math.floor(Math.random()*moves.length) } while (i === last); last = i; $('mv').textContent = moves[i]; };
+    pick(); let left = st.seconds;
+    stopTimer();
+    timerId = setInterval(() => { left--; k++; $('t').textContent = '0:' + String(left).padStart(2,'0');
+      if (k % 5 === 0 && left > 0) pick();
+      if (left <= 0) { stopTimer(); $('mv').textContent = 'СТОП! Вы великолепны 🏆'; $('done').hidden = false; burst(W/2, H*.35, 80); } }, 1000);
+  };
+  $('done').onclick = () => next(3);
+}
+function match(st, z){
+  const qs = st.questions; let i = 0, hits = 0;
+  const draw = () => {
+    if (i >= qs.length) {
+      const stars = Math.max(1, Math.round(hits/qs.length*5));
+      z.innerHTML = `<div class="q">Совпадений: ${hits} из ${qs.length}</div>
+        <div class="msg ok">${hits >= 5 ? 'Вы как будто одна голова на двоих! 🤯' : hits >= 3 ? 'Отличная команда! 💞' : 'Зато вам точно не скучно вместе 😹'}</div>
+        <button class="btn gold" id="done">Дальше (+${stars} ⭐)</button>`;
+      $('done').onclick = () => next(stars); return;
+    }
+    z.innerHTML = `<div class="muted" style="text-align:center">Вопрос ${i+1} из ${qs.length} · совпадений: ${hits}</div>
+      <div class="q">${qs[i]}</div><div class="muted" style="text-align:center">Раз… два… три — отвечайте!</div>
+      <div class="row"><button class="btn" id="y">✨ Совпало</button><button class="btn ghost" id="n">Не совпало</button></div>`;
+    $('y').onclick = () => { hits++; i++; burst(W/2, H*.5, 25, 'heart'); draw(); };
+    $('n').onclick = () => { i++; draw(); };
+  };
+  draw();
+}
+function duel(st, z){
+  z.innerHTML = `<button class="btn" id="go">⚡ Открыть дуэль</button><div class="msg" id="m"></div>`;
+  $('go').onclick = () => {
+    const D = $('duel'); $('n1').textContent = S.a; $('n2').textContent = S.b;
+    let c = [0,0], live = false, over = false; const GOAL = 40;
+    const upd = () => { $('c1').textContent = c[0]; $('c2').textContent = c[1];
+      $('f1').style.height = c[0]/GOAL*100 + '%'; $('f2').style.height = c[1]/GOAL*100 + '%'; };
+    upd(); D.classList.add('show'); $('duelMid').textContent = 'Приготовились…';
+    let n = 3; const go = setInterval(() => { $('duelMid').textContent = n > 0 ? n : 'ЖМИ!'; if (n-- < 0) { clearInterval(go); live = true; $('duelMid').textContent = '⚡'; } }, 700);
+    const tap = k => e => { e.preventDefault(); if (!live || over) return; c[k]++; upd();
+      if (c[k] >= GOAL) { over = true; const win = k ? S.b : S.a; $('duelMid').textContent = '🏆 ' + win + ' победила!';
+        burst(W/2, k ? H*.75 : H*.25, 80);
+        setTimeout(() => { D.classList.remove('show'); $('p1').onpointerdown = $('p2').onpointerdown = null;
+          z.innerHTML = `<div class="q">🏆 Победила ${esc(win)}!</div><div class="muted" style="text-align:center">Победительнице +3 ⭐ в общую копилку, проигравшей — реванш в следующей жизни 😼</div>
+          <button class="btn gold" id="done">Дальше (+3 ⭐)</button>`; $('done').onclick = () => next(3); }, 2200); } };
+    $('p1').onpointerdown = tap(0); $('p2').onpointerdown = tap(1);
+  };
+}
+
+function renderFinal(app){
+  const n = STAGES.length, max = n*3 + 2;
+  const rank = S.stars >= max*.8 ? 'Ночные Королевы 👑' : S.stars >= max*.5 ? 'Повелительницы Луны 🌙' : 'Ночные Котики 🐾';
+  const d = new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+  app.innerHTML = `<div style="height:30px"></div>` + guide('Мур-р-р! Квест пройден. Я официально вручаю вам звание. Сделайте скриншот! 📸') +
+    `<div class="card cert"><div class="medal">🏅</div><span class="tag" style="align-self:center">ОРДЕН НОЧНОГО КВЕСТА</span>
+      <div class="names">${esc(S.a)} & ${esc(S.b)}</div>
+      <div class="muted">получают почётное звание</div>
+      <div class="title">${rank}</div>
+      <div class="stars">⭐ ${S.stars}</div>
+      <div class="muted">${d} · подписано: Жир, ведущий квеста 🐾</div>
+      ${CONFIG.secret ? `<div class="secret">🎁 <b>Секретная награда!</b><br>${esc(CONFIG.secret)}</div>` : ''}
+    </div><button class="reset" id="rs">Пройти квест заново</button>`;
+  $('rs').onclick = () => { localStorage.removeItem(KEY); S = {a:'',b:'',step:-1,stars:0}; render(); };
+  burst(W*.25, H*.4, 90); burst(W*.75, H*.4, 90); burst(W/2, H*.25, 100, 'heart');
+}
+
+/* ---------- небо и частицы ---------- */
+const sky = $('sky'), sc = sky.getContext('2d'), cv = $('fx'), ctx = cv.getContext('2d');
+let W, H, D = devicePixelRatio || 1, stars = [];
+function rs(){ W = cv.width = sky.width = innerWidth*D; H = cv.height = sky.height = innerHeight*D;
+  stars = Array.from({length:90}, () => ({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.4+.3, p:Math.random()*6.28, s:Math.random()*.03+.01})); }
+addEventListener('resize', rs); rs();
+const R = (a,b) => a + Math.random()*(b-a);
+const COL = ['#ff4f9a','#ffe27a','#c9a7ff','#7fd6ff','#ffffff','#ff9ccc','#3ee8b5'];
+let parts = [];
+function burst(x, y, n=60, kind){
+  for(let i=0;i<n;i++){ const a=R(0,6.28), v=R(2,10)*D;
+    parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-R(1,4)*D,s:R(6,13)*D,c:COL[i%COL.length],k:kind==='heart'?'h':['h','s','c'][i%3],life:1,d:R(.008,.015),r:R(0,6.28),vr:R(-.2,.2)}); }
+}
+function heart(s){ ctx.beginPath(); ctx.moveTo(0,s*.3); ctx.bezierCurveTo(-s,-s*.4,-s*.4,-s*1.1,0,-s*.45); ctx.bezierCurveTo(s*.4,-s*1.1,s,-s*.4,0,s*.3); ctx.fill(); }
+function star(s){ ctx.beginPath(); for(let i=0;i<10;i++){ const r=i%2?s*.42:s, a=i*Math.PI/5-Math.PI/2; ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} ctx.fill(); }
+(function loop(){
+  sc.clearRect(0,0,W,H);
+  for (const s of stars){ s.p += s.s; sc.globalAlpha = .35 + .65*(Math.sin(s.p)+1)/2; sc.fillStyle = '#fff'; sc.beginPath(); sc.arc(s.x, s.y, s.r*D, 0, 6.28); sc.fill(); }
+  ctx.clearRect(0,0,W,H);
+  parts = parts.filter(p => p.life > 0);
+  for (const p of parts){ p.vx*=.97; p.vy=p.vy*.97+.18*D; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life-=p.d;
+    ctx.save(); ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c; ctx.translate(p.x,p.y); ctx.rotate(p.r);
+    if(p.k==='h') heart(p.s); else if(p.k==='s') star(p.s*.7); else { ctx.beginPath(); ctx.arc(0,0,p.s*.35,0,6.28); ctx.fill(); }
+    ctx.restore(); }
+  requestAnimationFrame(loop);
+})();
+
+render();
+</script>
+</body>
+</html>
